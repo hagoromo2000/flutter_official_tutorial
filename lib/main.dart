@@ -1,5 +1,6 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -73,40 +74,43 @@ class _MyHomePageState extends State<MyHomePage> {
         throw UnimplementedError('no widget for $selectedIndex');
     }
 
-    return Scaffold(
-        body: Row(
-      children: [
-        // SafeAreaは画面の端に表示されるステータスバーなどの領域を考慮してくれる
-        // このアプリでは、このウィジェットがNavigationRailを包んで、ナビゲーション ボタンがモバイル ステータスバーなどで隠されるのを防いでいる
-        SafeArea(
-          child: NavigationRail(
-            extended: false, // ラベルを表示するかどうか
-            destinations: [
-              NavigationRailDestination(
-                icon: Icon(Icons.home),
-                label: Text('Home'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.favorite),
-                label: Text('Favorites'),
-              ),
-            ],
-            selectedIndex: selectedIndex,
-            onDestinationSelected: (value) {
-              setState(() {
-                selectedIndex = value;
-              });
-            },
+    return LayoutBuilder(builder: (context, constraints) {
+      return Scaffold(
+          body: Row(
+        children: [
+          // SafeAreaは画面の端に表示されるステータスバーなどの領域を考慮してくれる
+          // このアプリでは、このウィジェットがNavigationRailを包んで、ナビゲーション ボタンがモバイル ステータスバーなどで隠されるのを防いでいる
+          SafeArea(
+            child: NavigationRail(
+              extended:
+                  constraints.maxWidth >= 600, // 600以上の場合はextendedをtrueにする
+              destinations: [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home),
+                  label: Text('Home'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.favorite),
+                  label: Text('Favorites'),
+                ),
+              ],
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (value) {
+                setState(() {
+                  selectedIndex = value;
+                });
+              },
+            ),
           ),
-        ),
-        Expanded(
-          child: Container(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            child: page,
+          Expanded(
+            child: Container(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              child: page,
+            ),
           ),
-        ),
-      ],
-    ));
+        ],
+      ));
+    });
   }
 }
 
