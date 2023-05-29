@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         title: 'Test Drive',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         ),
         home: MyHomePage(),
       ),
@@ -43,26 +43,56 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     // MyHomePageではMyAppStateをwatchし、アプリの現在の状態に対する変更を追跡する
     var appState = context.watch<MyAppState>();
+    var pair = appState.current;
 
     return Scaffold(
       // Columnは子要素を縦に並べるレイアウトウィジェット
-      body: Column(
-        children: [
-          Text(
-            'A random AWESOME idea:',
-            style: TextStyle(
-              fontSize: 24.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          // 2個目のTextはappState.current（WordPair)の値を表示する
-          Text(appState.current.asLowerCase),
-          ElevatedButton(
-              onPressed: () {
-                appState.getNext();
-              },
-              child: Text('Next')),
-        ],
+      // リファクターからwrap with centerで中央よせ
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center, // 子要素を中央に配置
+          children: [
+            // 2個目のTextはappState.current（WordPair)の値を表示する
+            BigCard(pair: pair),
+            SizedBox(height: 20), // SizedBoxは指定したサイズの空白を作る
+            ElevatedButton(
+                onPressed: () {
+                  appState.getNext();
+                },
+                child: Text('Next')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class BigCard extends StatelessWidget {
+  const BigCard({
+    super.key,
+    required this.pair,
+  });
+
+  final WordPair pair;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final style = theme.textTheme.displayMedium!.copyWith(
+      color: theme.colorScheme.onPrimary,
+      letterSpacing: -1.0,
+    );
+
+    return Card(
+      color: theme.colorScheme.primary,
+      elevation: 8.0,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Text(
+          pair.asLowerCase,
+          style: style,
+          semanticsLabel: "${pair.first} ${pair.second}",
+        ),
       ),
     );
   }
