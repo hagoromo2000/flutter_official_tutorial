@@ -35,6 +35,20 @@ class MyAppState extends ChangeNotifier {
     current = WordPair.random();
     notifyListeners();
   }
+
+  // お気に入りのWordPairを保持するリスト(ジェネリクスで型を指定)
+  var favorites = <WordPair>[];
+
+  void toggleFavorite() {
+    // お気に入りに含まれているかどうかをcontainsで判定
+    if (favorites.contains(current)) {
+      favorites.remove(current); // 含まれていれば削除
+    } else {
+      favorites.add(current); // 含まれていなければ追加
+    }
+    // 変更を通知
+    notifyListeners();
+  }
 }
 
 class MyHomePage extends StatelessWidget {
@@ -44,6 +58,9 @@ class MyHomePage extends StatelessWidget {
     // MyHomePageではMyAppStateをwatchし、アプリの現在の状態に対する変更を追跡する
     var appState = context.watch<MyAppState>();
     var pair = appState.current;
+    final isFavorite = appState.favorites.contains(pair);
+    final favorite_icon = isFavorite ? Icons.favorite : Icons.favorite_border;
+    final like_or_unlike = isFavorite ? Text('Unlike') : Text('Like');
 
     return Scaffold(
       // Columnは子要素を縦に並べるレイアウトウィジェット
@@ -51,15 +68,29 @@ class MyHomePage extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center, // 子要素を中央に配置
+
           children: [
             // 2個目のTextはappState.current（WordPair)の値を表示する
             BigCard(pair: pair),
             SizedBox(height: 20), // SizedBoxは指定したサイズの空白を作る
-            ElevatedButton(
-                onPressed: () {
-                  appState.getNext();
-                },
-                child: Text('Next')),
+            Row(
+              mainAxisSize: MainAxisSize.min, // Rowの幅を子要素の合計にする
+              children: [
+                ElevatedButton.icon(
+                    onPressed: () {
+                      appState.toggleFavorite();
+                    },
+                    // favoriteに含まれているかどうか判定し、表示を出し分ける
+                    icon: Icon(favorite_icon),
+                    label: like_or_unlike),
+                SizedBox(width: 10),
+                ElevatedButton(
+                    onPressed: () {
+                      appState.getNext();
+                    },
+                    child: Text('Next')),
+              ],
+            ),
           ],
         ),
       ),
