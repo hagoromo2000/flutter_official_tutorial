@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         title: 'Test Drive',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         ),
         home: MyHomePage(),
       ),
@@ -51,7 +51,54 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  var selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Row(
+      children: [
+        // SafeAreaは画面の端に表示されるステータスバーなどの領域を考慮してくれる
+        // このアプリでは、このウィジェットがNavigationRailを包んで、ナビゲーション ボタンがモバイル ステータスバーなどで隠されるのを防いでいる
+        SafeArea(
+          child: NavigationRail(
+            extended: false, // ラベルを表示するかどうか
+            destinations: [
+              NavigationRailDestination(
+                icon: Icon(Icons.home),
+                label: Text('Home'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.favorite),
+                label: Text('Favorites'),
+              ),
+            ],
+            selectedIndex: selectedIndex,
+            onDestinationSelected: (value) {
+              setState(() {
+                selectedIndex = value;
+              });
+            },
+          ),
+        ),
+        Expanded(
+          child: Container(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: GeneratorPage(),
+          ),
+        ),
+      ],
+    ));
+  }
+}
+
+class GeneratorPage extends StatelessWidget {
   @override
   // buildメソッドは周囲の状況が変化するたびに自動でよびだされる(状態を最新に保つため、どのウィジェットでも定義する必要がある)
   Widget build(BuildContext context) {
@@ -59,40 +106,38 @@ class MyHomePage extends StatelessWidget {
     var appState = context.watch<MyAppState>();
     var pair = appState.current;
     final isFavorite = appState.favorites.contains(pair);
-    final favorite_icon = isFavorite ? Icons.favorite : Icons.favorite_border;
-    final like_or_unlike = isFavorite ? Text('Unlike') : Text('Like');
+    final favoriteIcon = isFavorite ? Icons.favorite : Icons.favorite_border;
+    final likeOrUnlike = isFavorite ? Text('Unlike') : Text('Like');
 
-    return Scaffold(
+    return Center(
       // Columnは子要素を縦に並べるレイアウトウィジェット
       // リファクターからwrap with centerで中央よせ
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // 子要素を中央に配置
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center, // 子要素を中央に配置
 
-          children: [
-            // 2個目のTextはappState.current（WordPair)の値を表示する
-            BigCard(pair: pair),
-            SizedBox(height: 20), // SizedBoxは指定したサイズの空白を作る
-            Row(
-              mainAxisSize: MainAxisSize.min, // Rowの幅を子要素の合計にする
-              children: [
-                ElevatedButton.icon(
-                    onPressed: () {
-                      appState.toggleFavorite();
-                    },
-                    // favoriteに含まれているかどうか判定し、表示を出し分ける
-                    icon: Icon(favorite_icon),
-                    label: like_or_unlike),
-                SizedBox(width: 10),
-                ElevatedButton(
-                    onPressed: () {
-                      appState.getNext();
-                    },
-                    child: Text('Next')),
-              ],
-            ),
-          ],
-        ),
+        children: [
+          // 2個目のTextはappState.current（WordPair)の値を表示する
+          BigCard(pair: pair),
+          SizedBox(height: 20), // SizedBoxは指定したサイズの空白を作る
+          Row(
+            mainAxisSize: MainAxisSize.min, // Rowの幅を子要素の合計にする
+            children: [
+              ElevatedButton.icon(
+                  onPressed: () {
+                    appState.toggleFavorite();
+                  },
+                  // favoriteに含まれているかどうか判定し、表示を出し分ける
+                  icon: Icon(favoriteIcon),
+                  label: likeOrUnlike),
+              SizedBox(width: 10),
+              ElevatedButton(
+                  onPressed: () {
+                    appState.getNext();
+                  },
+                  child: Text('Next')),
+            ],
+          ),
+        ],
       ),
     );
   }
