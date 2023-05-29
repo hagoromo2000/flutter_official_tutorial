@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
         page = GeneratorPage();
         break;
       case 1:
-        page = Placeholder();
+        page = FavoritesPage();
         break;
       default:
         throw UnimplementedError('no widget for $selectedIndex');
@@ -187,5 +187,58 @@ class BigCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class FavoritesPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    var favorites = appState.favorites;
+
+    // favoritesがが空の場合に、'No favorites yet'を表示する
+    if (favorites.isEmpty) {
+      return Center(
+        child: Text(
+          'お気に入りしたワードはありません',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      );
+    }
+
+    return Column(children: [
+      Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Text(
+          'お気に入りしたワードは${favorites.length}個です',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      ),
+      Expanded(
+          child: ListView.builder(
+        itemCount: favorites.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(
+              favorites[index].asLowerCase,
+              //　Primaryカラーを指定
+              style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 20, // フォントの大きさを指定
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            // お気に入りの削除
+            trailing: IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                appState.favorites.remove(favorites[index]);
+                appState.notifyListeners();
+              },
+            ),
+          );
+        },
+      ))
+    ]);
   }
 }
